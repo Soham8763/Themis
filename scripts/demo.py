@@ -4,7 +4,8 @@ import json
 import time
 
 # Ensure backend in PYTHONPATH
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "backend"))
+backend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "services", "backend")
+sys.path.insert(0, backend_dir)
 
 from app.agents.orchestrator import run_multi_agent_pipeline
 
@@ -13,7 +14,7 @@ def run_demo():
     print("  THEMIS: Automated Policy Compliance & Risk Auditing Engine - DEMO")
     print("==========================================================================")
     
-    sample_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "backend", "data", "sample_transactions.json")
+    sample_path = os.path.join(backend_dir, "data", "sample_transactions.json")
     if not os.path.exists(sample_path):
         print(f"Error: Could not find sample transactions at {sample_path}")
         return

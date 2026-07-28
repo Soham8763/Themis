@@ -3,7 +3,7 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .
+      context: ..
       dockerfile: deployments/docker/Dockerfile.backend
     ports:
       - "8000:8000"
@@ -13,12 +13,12 @@ services:
       - DATABASE_URL=sqlite+aiosqlite:///./themis.db
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:
-      - ./services/backend/data:/app/services/backend/data
-      - ./chroma_db:/app/chroma_db
+      - ../services/backend/data:/app/services/backend/data
+      - ../chroma_db:/app/chroma_db
 
   mcp-policy-retriever:
     build:
-      context: .
+      context: ..
       dockerfile: deployments/docker/Dockerfile.backend
     command: python /app/services/mcp_servers/policy_retriever_mcp.py
     ports:
@@ -26,7 +26,7 @@ services:
 
   mcp-email-alerter:
     build:
-      context: .
+      context: ..
       dockerfile: deployments/docker/Dockerfile.backend
     command: python /app/services/mcp_servers/email_alerter_mcp.py
     ports:
@@ -34,7 +34,7 @@ services:
 
   mcp-audit-logger:
     build:
-      context: .
+      context: ..
       dockerfile: deployments/docker/Dockerfile.backend
     command: python /app/services/mcp_servers/audit_logger_mcp.py
     ports:
@@ -42,7 +42,7 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ..
       dockerfile: deployments/docker/Dockerfile.frontend
     ports:
       - "3000:3000"

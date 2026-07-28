@@ -1,5 +1,10 @@
+import os
+import sys
 import pytest
 import asyncio
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "services", "backend"))
+
 from app.agents.intake_agent import intake_agent
 from app.agents.policy_retrieval_agent import policy_retrieval_agent
 from app.agents.risk_analysis_agent import risk_analysis_agent, evaluate_deterministic_rules
