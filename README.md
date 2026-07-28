@@ -49,21 +49,21 @@ Access services once containers are healthy:
 
 ```bash
 # 1. Setup Backend Virtual Environment & Dependencies
-python3 -m venv backend/venv
-source backend/venv/bin/activate
-pip install -r backend/requirements.txt
+python3 -m venv services/backend/venv
+source services/backend/venv/bin/activate
+pip install -r services/backend/requirements.txt
 
 # 2. Configure Environment (Gemini API Key optional, hybrid fallback active)
-cp backend/.env.example backend/.env
+cp services/backend/.env.example services/backend/.env
 
 # 3. Execute Interactive CLI Audit Demo (Evaluates 20 Sample Transactions)
 python3 scripts/demo.py
 
 # 4. Start FastAPI Gateway
-python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir backend
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir services/backend
 
 # 5. Start Next.js Frontend (In a separate terminal)
-cd frontend
+cd services/frontend
 npm install
 npm run dev
 ```
@@ -329,54 +329,63 @@ THEMIS manages transaction auditing through a deterministic state machine:
 
 ```
 Themis/
-├── backend/
-│   ├── app/
-│   │   ├── main.py                     # FastAPI Gateway (REST + WebSockets)
-│   │   ├── config.py                   # Pydantic environment configuration
-│   │   ├── database.py                 # Async SQLAlchemy engine & session maker
-│   │   ├── models.py                   # ORM models (Transaction, Policy, Decision, AuditLog)
-│   │   ├── schemas.py                  # Pydantic request/response validation
-│   │   ├── agents/                     # LangGraph Multi-Agent System
-│   │   │   ├── state.py                # AgentState TypedDict schema
-│   │   │   ├── intake_agent.py         # Agent 1: Intake & Structuring
-│   │   │   ├── policy_retrieval_agent.py# Agent 2: RAG Policy Retriever
-│   │   │   ├── risk_analysis_agent.py  # Agent 3: Risk Analysis (Gemini AI + Rules)
-│   │   │   ├── decision_agent.py       # Agent 4: Decision Engine
-│   │   │   ├── audit_agent.py          # Agent 5: Audit Logger
-│   │   │   └── orchestrator.py         # LangGraph StateGraph engine
-│   │   └── rag/                        # RAG Vector DB Pipeline
-│   │       ├── embeddings.py           # SentenceTransformer vector embedder
-│   │       ├── vector_store.py         # ChromaDB vector store manager
-│   │       └── ingest.py               # Policy vector ingestion script
-│   ├── data/
-│   │   ├── sample_policies.json        # 5 regulatory policy documents (KYC, AML, Limits, Sanctions, PEP)
-│   │   └── sample_transactions.json    # 20 test transactions (compliant, high amount, sanctions, PEP)
-│   ├── mcp_servers/                    # 3 Model Context Protocol Servers
-│   │   ├── policy_retriever_mcp.py     # MCP Server 1 (Port 8001)
-│   │   ├── email_alerter_mcp.py        # MCP Server 2 (Port 8002)
-│   │   └── audit_logger_mcp.py         # MCP Server 3 (Port 8003)
-│   ├── tests/
-│   │   ├── test_phase1.py              # Phase 1 unit & integration tests
-│   │   └── test_phase2.py              # Phase 2 RAG & vector store tests
-│   └── requirements.txt
-├── frontend/                           # Next.js 14 Dashboard App
-│   ├── src/
-│   │   ├── app/                        # App Router Pages (Overview, Transactions, Audit, Policies)
-│   │   ├── components/                 # Glassmorphic UI Components (Metrics, Feed, Inspector, Timeline)
-│   │   └── types/                      # TypeScript Interface Definitions
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── tsconfig.json
+├── .github/
+│   └── workflows/
+│       └── ci.yml                         # Automated CI pipeline for unit & integration tests
+├── deployments/
+│   ├── docker/
+│   │   ├── Dockerfile.backend             # Production Multi-Stage FastAPI Build
+│   │   └── Dockerfile.frontend            # Production Standalone Next.js Build
+│   └── docker-compose.yml                 # Distributed multi-container orchestrator
+├── docs/
+│   ├── ARCHITECTURE.md                    # System architecture & multi-agent sequence diagrams
+│   └── API.md                             # REST & WebSocket API specification
 ├── scripts/
-│   └── demo.py                         # CLI Interactive Demo Script
-├── .github/workflows/
-│   └── ci.yml                          # GitHub Actions CI Workflow
-├── Dockerfile.backend
-├── Dockerfile.frontend
-├── docker-compose.yml                  # Unified multi-service deployment stack
-├── ARCHITECTURE.md                     # Technical architecture deep dive
-├── API.md                              # REST & WebSocket API specification
-└── README.md
+│   └── demo.py                            # Standalone terminal demo script
+├── services/
+│   ├── backend/                           # FastAPI Core Backend Engine
+│   │   ├── app/
+│   │   │   ├── agents/                    # LangGraph 5-Agent Compliance State Graph
+│   │   │   │   ├── intake_agent.py
+│   │   │   │   ├── policy_retrieval_agent.py
+│   │   │   │   ├── risk_analysis_agent.py
+│   │   │   │   ├── decision_agent.py
+│   │   │   │   ├── audit_agent.py
+│   │   │   │   └── orchestrator.py
+│   │   │   ├── rag/                       # RAG Vector DB Search & Embeddings
+│   │   │   │   ├── embeddings.py
+│   │   │   │   ├── vector_store.py
+│   │   │   │   └── ingest.py
+│   │   │   ├── config.py                  # Pydantic Settings & Env Config
+│   │   │   ├── database.py                # Async SQLAlchemy SQLite/PostgreSQL Store
+│   │   │   ├── main.py                    # Gateway & WebSocket Server
+│   │   │   ├── models.py                  # Database Models
+│   │   │   └── schemas.py                 # Pydantic DTOs
+│   │   ├── data/                          # Sample Policies & Transaction Dataset
+│   │   ├── requirements.txt
+│   │   └── .env.example
+│   ├── mcp_servers/                       # Model Context Protocol (MCP) Tool Servers
+│   │   ├── policy_retriever_mcp.py        # MCP Server 1 (Port 8001)
+│   │   ├── email_alerter_mcp.py           # MCP Server 2 (Port 8002)
+│   │   └── audit_logger_mcp.py            # MCP Server 3 (Port 8003)
+│   └── frontend/                          # Next.js 14 Dashboard App
+│       ├── src/
+│       │   ├── app/                       # App Router (Audit, Policies, Transactions)
+│       │   ├── components/                # Glassmorphic UI Components (Metrics, Feed, Inspector, Timeline)
+│       │   └── types/                     # TypeScript Definitions
+│       ├── package.json
+│       ├── tailwind.config.js
+│       └── tsconfig.json
+├── tests/
+│   ├── unit/                              # Isolated Agent Unit Tests
+│   │   └── test_phase1.py
+│   └── integration/                       # Rigorous 14-Scenario Backend Tests
+│       ├── test_phase2.py
+│       └── test_rigorous_backend.py
+├── docker-compose.yml                     # Root docker-compose entry point
+├── Makefile                               # CLI Automation Shortcuts
+├── README.md                              # Main Production Documentation
+└── .gitignore                             # Secret & Binary Exclusion Guards
 ```
 
 ---
