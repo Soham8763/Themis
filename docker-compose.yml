@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+      - DEBUG=False
+      - DATABASE_URL=sqlite+aiosqlite:///./themis.db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./chroma_db:/app/chroma_db
+
+  mcp-policy-retriever:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: python /app/backend/mcp_servers/policy_retriever_mcp.py
+    ports:
+      - "8001:8001"
+
+  mcp-email-alerter:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: python /app/backend/mcp_servers/email_alerter_mcp.py
+    ports:
+      - "8002:8002"
+
+  mcp-audit-logger:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: python /app/backend/mcp_servers/audit_logger_mcp.py
+    ports:
+      - "8003:8003"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000

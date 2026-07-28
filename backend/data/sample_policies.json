@@ -1,0 +1,117 @@
+[
+  {
+    "policy_id": "POL-KYC-001",
+    "category": "KYC",
+    "title": "Customer Identification & Verification Policy",
+    "version": "2.1",
+    "content": "All new customer accounts must complete standard identity verification (KYC Level 1) prior to initiating transactions exceeding $5,000. Accounts with incomplete verification (KYC Level 0) are restricted to single transactions under $2,500 and total aggregate daily transfers under $5,000. Accounts aged less than 30 days are categorized as new accounts and require enhanced monitoring for initial wire transfers exceeding $10,000.",
+    "rules": [
+      {
+        "rule_id": "KYC-R1",
+        "rule_name": "Unverified Account High-Value Limit",
+        "condition": "kyc_level == 0 AND amount > 2500",
+        "severity": "HIGH",
+        "action": "ESCALATE"
+      },
+      {
+        "rule_id": "KYC-R2",
+        "rule_name": "New Account Large Wire Threshold",
+        "condition": "account_age_days < 30 AND transaction_type == 'wire_transfer' AND amount > 10000",
+        "severity": "MEDIUM",
+        "action": "REVIEW"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-AML-002",
+    "category": "AML",
+    "title": "Anti-Money Laundering & Transaction Monitoring Policy",
+    "version": "3.0",
+    "content": "Any single transaction equal to or exceeding $10,000 USD (or foreign currency equivalent) must trigger an automatic Currency Transaction Report (CTR) filing indicator. Transactions structured in rapid succession (e.g., multiple transactions under $10,000 within 24 hours totaling >$15,000) are flagged as suspicious structuring. Cash deposits exceeding $50,000 require senior compliance officer approval.",
+    "rules": [
+      {
+        "rule_id": "AML-R1",
+        "rule_name": "Mandatory CTR Threshold",
+        "condition": "amount >= 10000",
+        "severity": "LOW",
+        "action": "REVIEW"
+      },
+      {
+        "rule_id": "AML-R2",
+        "rule_name": "Excessive Cash Deposit Warning",
+        "condition": "transaction_type == 'cash_deposit' AND amount > 50000",
+        "severity": "HIGH",
+        "action": "ESCALATE"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-LMT-003",
+    "category": "Limits",
+    "title": "Transaction Thresholds & Escalation Limits Policy",
+    "version": "1.4",
+    "content": "Single outbound wire transfers exceeding $100,000 USD require dual-sign-off authorization and secondary fraud score verification. Transactions exceeding $500,000 USD are immediately held for Executive Committee Compliance Review regardless of customer standing.",
+    "rules": [
+      {
+        "rule_id": "LMT-R1",
+        "rule_name": "High Value Dual Authorization Required",
+        "condition": "amount > 100000 AND dual_approval == false",
+        "severity": "HIGH",
+        "action": "ESCALATE"
+      },
+      {
+        "rule_id": "LMT-R2",
+        "rule_name": "Executive Review Threshold",
+        "condition": "amount > 500000",
+        "severity": "CRITICAL",
+        "action": "ESCALATE"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-SNC-004",
+    "category": "Sanctions",
+    "title": "Sanctioned & High-Risk Jurisdictions Policy",
+    "version": "4.2",
+    "content": "Transactions involving OFAC comprehensive sanctions countries (Iran, North Korea, Syria, Cuba, Crimea Region) are strictly prohibited and subject to immediate asset block and regulatory reporting. High-risk jurisdictions designated under FATF grey-list (e.g., Myanmar, Yemen, South Sudan) require Enhanced Due Diligence (EDD) prior to processing.",
+    "rules": [
+      {
+        "rule_id": "SNC-R1",
+        "rule_name": "OFAC Comprehensive Sanctions Block",
+        "condition": "destination_country IN ['Iran', 'North Korea', 'Syria', 'Cuba', 'Crimea']",
+        "severity": "CRITICAL",
+        "action": "ESCALATE"
+      },
+      {
+        "rule_id": "SNC-R2",
+        "rule_name": "FATF High-Risk Jurisdiction EDD",
+        "condition": "destination_country IN ['Myanmar', 'Yemen', 'South Sudan']",
+        "severity": "HIGH",
+        "action": "REVIEW"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-PEP-005",
+    "category": "PEP",
+    "title": "Politically Exposed Persons (PEP) Governance Policy",
+    "version": "2.0",
+    "content": "Any transaction initiated by or benefiting a Politically Exposed Person (PEP) or immediate family member/close associate requires mandatory PEP compliance clearance. Cross-border transfers exceeding $25,000 for PEP accounts must include documented Source of Wealth (SoW) verification.",
+    "rules": [
+      {
+        "rule_id": "PEP-R1",
+        "rule_name": "PEP Cross-Border SoW Check",
+        "condition": "pep_flag == true AND is_cross_border == true AND amount > 25000 AND sow_verified == false",
+        "severity": "HIGH",
+        "action": "ESCALATE"
+      },
+      {
+        "rule_id": "PEP-R2",
+        "rule_name": "PEP Activity Flag",
+        "condition": "pep_flag == true",
+        "severity": "MEDIUM",
+        "action": "REVIEW"
+      }
+    ]
+  }
+]
